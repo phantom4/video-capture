@@ -9,7 +9,7 @@ module.exports = {
     '@vue/typescript',
   ],
   rules: {
-    // TODO production時はdrop_consoleする
+    // terserで削除されるが、lintが先に通ってしまうので、offにしておく
     // 'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-console': 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
