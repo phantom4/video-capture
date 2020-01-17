@@ -37,7 +37,7 @@ const state: IState = {
     items: [],
     // TODO cookieから復元する
     sortType: 'created',
-    imageFormat: 'png',
+    imageFormat: 'jpeg',
     lastEditAt: null,
   },
 }

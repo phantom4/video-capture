@@ -20,9 +20,9 @@
             label.label.is-small 画像形式
             .field.has-addons
               p.control
-                button.button.is-small(@click="changeImageFormat('png')", :class="{ 'is-info': imageFormat === 'png' }") PNG
-              p.control
                 button.button.is-small(@click="changeImageFormat('jpeg')", :class="{ 'is-info': imageFormat === 'jpeg' }") JPG
+              p.control
+                button.button.is-small(@click="changeImageFormat('png')", :class="{ 'is-info': imageFormat === 'png' }") PNG
 
     .capture-body
       .columns.is-multiline
