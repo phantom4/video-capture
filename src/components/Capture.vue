@@ -62,10 +62,11 @@ export default class Capture extends Vue {
       clearTimeout(this.debounceTimer)
     }
 
-    this.debounceTimer = setTimeout(() => {
+    this.debounceTimer = Number(setTimeout(() => {
       this.debounceTimer = NaN
       this.captureVideo()
-    }, 1000)
+    }, 1000))
+    // NodeJS.Timeout型になってしまうので、Numberでキャストしておく
   }
 
   /**

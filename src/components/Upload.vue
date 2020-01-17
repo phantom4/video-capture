@@ -201,17 +201,6 @@ export default class Upload extends Mixins(RemoveVideo) {
           this.$store.commit(`${captureModule.moduleName}/${captureModule.Mutation.PICTURE.CLEAR_ALL}`)
           this.toBlobURL(file)
         })
-      // if (this.$store.state[captureModule.moduleName].picture.items.length > 0) {
-      //   // すでに存在している場合はアラートを表示
-      //   if (window.confirm('生成したキャプチャがクリアされますがよろしいですか？')) {
-      //     // キャプチャをクリア
-      //     this.$store.commit(`${captureModule.moduleName}/${captureModule.Mutation.PICTURE.CLEAR_ALL}`)
-      //     this.toBlobURL(file)
-      //   }
-      // }
-      // else {
-      //   this.toBlobURL(file)
-      // }
     }
   }
 }

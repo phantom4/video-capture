@@ -3,7 +3,9 @@
 export const moduleName = 'capture'
 
 export const Getter = {
-
+  PICTURE: {
+    IMAGE_FORMAT_LABEL: 'picture.imageFormatLabel',
+  },
 }
 
 export const Mutation = {
@@ -93,5 +95,6 @@ export interface IState {
     items: IPicture[]
     sortType: Picture.SortType
     imageFormat: Picture.ImageFormat
+    lastEditAt: Date | null
   }
 }

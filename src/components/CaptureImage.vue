@@ -18,10 +18,7 @@
       .card-footer
         a(:href="downloadFile" :download="downloadFileName").card-footer-item.picture-download
           span.icon: i.fas.fa-download
-          | ダウンロード（
-          template(v-if="imageFormat === 'png'") PNG
-          template(v-else-if="imageFormat === 'jpeg'") JPG
-          | ）
+          | ダウンロード（{{ imageFormatLabel }}）
 
     b-modal(:active.sync="isModalActive" :width="videoWidth").expand-image
       p.image
@@ -38,6 +35,7 @@ import * as _ from 'lodash'
 import { Decimal } from 'decimal.js'
 import anime from 'animejs'
 import * as captureModule from '@/store/modules/capture/types'
+import * as videoUtil from '../utility/video'
 
 Vue.use(Buefy)
 
@@ -72,10 +70,17 @@ export default class CaptureImage extends Vue {
   isModalActive: boolean = false
 
   /**
-   * 画像のフォーマット
+   * キャプチャ画像のフォーマット
    */
   get imageFormat () {
     return this.$store.state[captureModule.moduleName].picture.imageFormat
+  }
+
+  /**
+   * 出力画像のフォーマットラベル
+   */
+  get imageFormatLabel () {
+    return this.$store.getters[`${captureModule.moduleName}/${captureModule.Getter.PICTURE.IMAGE_FORMAT_LABEL}`]
   }
 
   /**
@@ -93,11 +98,11 @@ export default class CaptureImage extends Vue {
     let result = '' // ファイル名
 
     if (uploadedFile) {
-      const parsedFileName = uploadedFile.name.match(/(.*)(?:\.([^.]+$))/)  // ファイル名と拡張子を分割
-      const videoTime = _.padStart(`${Math.round(this.videoTime * 1000)}`, 8, '0')  // 動画の秒数。24時間が86400000ミリ秒なので8桁用意すれば十分かと
+      const parsedFileName = videoUtil.parsedFileName(uploadedFile.name)  // ファイル名と拡張子を分割
+      const videoTime = videoUtil.timeToFileName(this.videoTime) // 動画の秒数をファイル名用に変換
       const ext = (this.imageFormat === 'jpeg') ? '.jpg' : '.png' // 拡張子
 
-      result = `${parsedFileName[1]}_screenshot-${videoTime}${ext}`
+      result = `${parsedFileName.name}_screenshot-${videoTime}${ext}`
     }
 
     return result
@@ -183,10 +188,10 @@ export default class CaptureImage extends Vue {
     &:hover,
     &:active,
     &:focus {
-      color: $primary;
+      color: $grey-dark;
 
       .icon {
-        color: $primary;
+        color: $grey-darker;
       }
     }
   }

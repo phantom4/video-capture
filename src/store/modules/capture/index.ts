@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import { ActionContext, ActionTree, GetterTree, MutationTree, Module } from 'vuex'
-import { Getter, Action, Mutation, IState, Picture } from './types'
-import { IRootState } from '../../types'
+import { Getter, Action, Mutation, IState, Picture, IPicture } from '@/store/modules/capture/types'
+import { IRootState } from '@/store/types'
 
 let pictureIndex = 0
 
@@ -38,11 +38,25 @@ const state: IState = {
     // TODO cookieから復元する
     sortType: 'created',
     imageFormat: 'png',
+    lastEditAt: null,
   },
 }
 
 const getters: GetterTree<IState, IRootState> = {
-
+  [Getter.PICTURE.IMAGE_FORMAT_LABEL]: (state: IState): string => {
+    let label = ''
+    switch (state.picture.imageFormat) {
+      case 'png':
+        label = 'PNG'
+        break
+      case 'jpeg':
+        label = 'JPG'
+        break
+      default:
+        break
+    }
+    return label
+  },
 }
 
 const mutations: MutationTree<IState> = {
@@ -184,6 +198,8 @@ const mutations: MutationTree<IState> = {
       videoTime: payload.videoTime,
       createdAt: new Date(),
     })
+
+    state.picture.lastEditAt = new Date() // 日時を更新
   },
 
   /**
@@ -205,6 +221,7 @@ const mutations: MutationTree<IState> = {
 
     if (findIndex >= 0) {
       state.picture.items.splice(findIndex, 1)
+      state.picture.lastEditAt = new Date() // 日時を更新
     }
   },
 
