@@ -15,11 +15,14 @@ export const Mutation = {
   VIDEO: {
     SRC: 'video.src',
     INFO: 'video.info',
+    FPS: 'video.fps',
     PLAY: 'video.play',
     PAUSE: 'video.pause',
     SEEK: 'video.seek',
     SEEKED: 'video.seeked',
     CURRENT_TIME: 'video.currentTime',
+    PREV_FRAME: 'video.prevFrame',
+    NEXT_FRAME: 'video.nextFrame',
     CLEAR: 'video.clear',
   },
   PICTURE: {

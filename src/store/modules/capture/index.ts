@@ -2,6 +2,7 @@ import Vue from 'vue'
 import { ActionContext, ActionTree, GetterTree, MutationTree, Module } from 'vuex'
 import { Getter, Action, Mutation, IState, Picture, IPicture } from '@/store/modules/capture/types'
 import { IRootState } from '@/store/types'
+import * as videoUtil from '@/utility/video'
 
 let pictureIndex = 0
 
@@ -108,6 +109,16 @@ const mutations: MutationTree<IState> = {
   },
 
   /**
+   * 動画のフレームレートを設定する
+   * @param state
+   * @param payload
+   * @param payload.fps フレームレート
+   */
+  [Mutation.VIDEO.FPS]: (state: IState, payload: { fps: number }) => {
+    state.video.fps = payload.fps
+  },
+
+  /**
    * 動画が再生された
    * @param state
    * @param payload
@@ -151,6 +162,28 @@ const mutations: MutationTree<IState> = {
    */
   [Mutation.VIDEO.CURRENT_TIME]: (state: IState, payload: { time: number; }) => {
     state.video.currentTime = payload.time
+  },
+
+  /**
+   * 次のフレームへ
+   * @param state
+   */
+  [Mutation.VIDEO.PREV_FRAME]: (state: IState) => {
+    const time = videoUtil.getMoveFrame(state.video.currentTime, state.video.fps, -1)
+    const dest = videoUtil.timeForVideo(time) // video用の秒数に補正
+
+    state.video.currentTime = Math.min(dest, state.video.duration)
+  },
+
+  /**
+   * 前のフレームへ
+   * @param state
+   */
+  [Mutation.VIDEO.NEXT_FRAME]: (state: IState) => {
+    const time = videoUtil.getMoveFrame(state.video.currentTime, state.video.fps, 1)
+    const dest = videoUtil.timeForVideo(time) // video用の秒数に補正
+
+    state.video.currentTime = Math.min(dest, state.video.duration)
   },
 
   /**

@@ -9,6 +9,7 @@
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import Decimal from 'decimal.js'
 import * as captureModule from '@/store/modules/capture/types'
+import * as videoUtil from '@/utility/video'
 
 interface Size {
   width: number;
@@ -94,7 +95,7 @@ export default class Capture extends Vue {
 
         // 実際の秒数から少しだけ進める
         // ブラウザによって同じcurrentTimeでも違うフレームが表示されることがある
-        const destCurrentTime = this.video.currentTime > 0 ? Decimal.add(this.video.currentTime, 0.001).toNumber() : 0
+        const destCurrentTime = videoUtil.timeForVideo(this.video.currentTime)
 
         this.seekVideo(destCurrentTime)
           .then(() => {
