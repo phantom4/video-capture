@@ -94,7 +94,7 @@ export default class Capture extends Vue {
 
         // 実際の秒数から少しだけ進める
         // ブラウザによって同じcurrentTimeでも違うフレームが表示されることがある
-        const destCurrentTime = this.video.currentTime > 0 ? this.video.currentTime + 0.001 : 0
+        const destCurrentTime = this.video.currentTime > 0 ? Decimal.add(this.video.currentTime, 0.001).toNumber() : 0
 
         this.seekVideo(destCurrentTime)
           .then(() => {
@@ -155,12 +155,13 @@ export default class Capture extends Vue {
         this.$video.currentTime = time
 
         // currentTimeが反映されるまで待つ
+        // ミリ秒まで完全に一致しないことがあるので、100ミリ秒以下の誤差まで許容する
         this.detectCaptureTimer = Number(setTimeout(() => {
-          if (this.$video && Decimal.sub(this.$video.currentTime, time).abs().toNumber() < 1) {
-            clearTimeout(this.detectCaptureTimer)
-            this.detectCaptureTimer = NaN
+          if (this.$video && Decimal.sub(this.$video.currentTime, time).abs().toNumber() < 0.1) {
+            // currentTimeが反映されてもvideoは動いていないことがあるので、反映されてるまで待つ
             setTimeout(() => {
-              // currentTimeが反映されてもvideoは動いていないことがあるので、反映されてるまで待つ
+              clearTimeout(this.detectCaptureTimer)
+              this.detectCaptureTimer = NaN
               resolve()
             }, 500)
           }
@@ -178,7 +179,12 @@ export default class Capture extends Vue {
         }, 250))
       }
       else {
-        reject(new Error(''))
+        if (this.$video === null) {
+          reject(new Error('video is null'))
+        }
+        else {
+          reject(new Error('capture is playing'))
+        }
       }
     })
   }
