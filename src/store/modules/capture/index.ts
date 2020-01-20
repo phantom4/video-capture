@@ -83,8 +83,13 @@ const mutations: MutationTree<IState> = {
    * blobを設定する
    * @param state
    * @param payload
+   * @param payload src Blob URL
    */
-  [Mutation.VIDEO.SRC]: (state: IState, payload: { src: Blob }) => {
+  [Mutation.VIDEO.SRC]: (state: IState, payload: { src: string }) => {
+    if (state.video.src !== null) {
+      // Blobを解放しておく
+      URL.revokeObjectURL(state.video.src)
+    }
     state.video.src = payload.src
   },
 
@@ -155,6 +160,11 @@ const mutations: MutationTree<IState> = {
   [Mutation.VIDEO.CLEAR]: (state: IState) => {
     state.uploaded.file = null
 
+    if (state.video.src !== null) {
+      // Blobを解放しておく
+      URL.revokeObjectURL(state.video.src)
+    }
+
     state.video.src = null
     state.video.width = 0
     state.video.height = 0
@@ -220,7 +230,14 @@ const mutations: MutationTree<IState> = {
     }
 
     if (findIndex >= 0) {
-      state.picture.items.splice(findIndex, 1)
+      const removed: IPicture[] = state.picture.items.splice(findIndex, 1)
+
+      // blobを解放
+      for (let i = 0, len = removed.length; i < len; i++) {
+        URL.revokeObjectURL(removed[i].blobURL.jpeg)
+        URL.revokeObjectURL(removed[i].blobURL.png)
+      }
+
       state.picture.lastEditAt = new Date() // 日時を更新
     }
   },
@@ -230,6 +247,13 @@ const mutations: MutationTree<IState> = {
    * @param state
    */
   [Mutation.PICTURE.CLEAR_ALL]: (state: IState) => {
+    // Blob URLを解放する
+    for (let i = 0, len = state.picture.items.length; i < len; i++) {
+      const item = state.picture.items[i]
+      URL.revokeObjectURL(item.blobURL.jpeg)
+      URL.revokeObjectURL(item.blobURL.png)
+    }
+
     state.picture.items = []
   },
 

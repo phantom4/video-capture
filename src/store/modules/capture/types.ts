@@ -80,7 +80,7 @@ export interface IState {
 
   // アップロードされた動画
   video: {
-    src: Blob | null
+    src: string | null
     width: number
     height: number
     duration: number

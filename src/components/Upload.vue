@@ -164,9 +164,9 @@ export default class Upload extends Mixins(RemoveVideo) {
    * @param file
    */
   toBlobURL (file: File) {
-    const blob = URL.createObjectURL(file)
+    const blobURL = URL.createObjectURL(file)
     this.$store.commit(`${captureModule.moduleName}/${captureModule.Mutation.VIDEO.SRC}`, {
-      src: blob,
+      src: blobURL,
     })
   }
 
