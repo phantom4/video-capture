@@ -7,6 +7,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+import Decimal from 'decimal.js'
 import * as captureModule from '@/store/modules/capture/types'
 
 interface Size {
@@ -21,6 +22,7 @@ export default class Capture extends Vue {
   $canvasContext: CanvasRenderingContext2D | null = null
   isPlaying: boolean = false  // キャプチャ中
   debounceTimer: number = NaN // 処理を間引くタイマー
+  detectCaptureTimer: number = NaN // キャプチャ用のvideoが移動されたか確認するためにタイマー
 
   mounted () {
     this.$video = this.$el.querySelector('video')
@@ -92,46 +94,93 @@ export default class Capture extends Vue {
 
         // 実際の秒数から少しだけ進める
         // ブラウザによって同じcurrentTimeでも違うフレームが表示されることがある
-        this.$video.currentTime = this.video.currentTime > 0 ? this.video.currentTime + 0.005 : 0
+        const destCurrentTime = this.video.currentTime > 0 ? this.video.currentTime + 0.001 : 0
 
-        setTimeout(() => {
-          // キャプチャ
-          // currentTimeが設定されたら処理する
-          if (this.$canvas && this.$canvasContext && this.$video) {
-            const currentTime = this.$video.currentTime  // 動画の再生位置
+        this.seekVideo(destCurrentTime)
+          .then(() => {
+            if (
+              this.$canvas &&
+              this.$canvasContext &&
+              this.$video
+            ) {
+              const videoTime = this.$video.currentTime
 
-            this.$canvasContext.drawImage(this.$video, 0, 0, this.videoSize.width, this.videoSize.height)
+              // video→canvas
+              this.$canvasContext.drawImage(this.$video, 0, 0, this.videoSize.width, this.videoSize.height)
 
-            // canvasをキャプチャ
-            Promise.all([
-              this.videoToBlob('jpeg'),
-              this.videoToBlob('png'),
-            ])
-              .then((values) => {
-                const jpeg = values[0]
-                const png = values[1]
+              // canvasをキャプチャ
+              Promise.all([
+                this.videoToBlob('jpeg'),
+                this.videoToBlob('png'),
+              ])
+                .then((values) => {
+                  const jpeg = values[0]
+                  const png = values[1]
 
-                // キャプチャを追加する
-                this.$store.commit(`${captureModule.moduleName}/${captureModule.Mutation.PICTURE.ADD}`, {
-                  blobURL: {
-                    png: window.URL.createObjectURL(png),
-                    jpeg: window.URL.createObjectURL(jpeg),
-                  },
-                  videoTime: currentTime,
+                  // キャプチャを追加する
+                  this.$store.commit(`${captureModule.moduleName}/${captureModule.Mutation.PICTURE.ADD}`, {
+                    blobURL: {
+                      png: window.URL.createObjectURL(png),
+                      jpeg: window.URL.createObjectURL(jpeg),
+                    },
+                    videoTime,
+                  })
+
+                  this.isPlaying = false
                 })
-
-                this.isPlaying = false
-              })
-              .catch(() => {
-                this.isPlaying = false
-              })
-          }
-          else {
+                .catch(() => {
+                  this.isPlaying = false
+                })
+            }
+            else {
+              // 諦める
+              this.isPlaying = false
+            }
+          })
+          .catch(() => {
             this.isPlaying = false
-          }
-        }, 500)
+          })
       }
     }
+  }
+
+  /**
+   * キャプチャ用動画の再生位置を設定
+   */
+  private seekVideo (time: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (this.$video && isNaN(this.detectCaptureTimer)) {
+        let retry = 8 // リトライ
+
+        this.$video.currentTime = time
+
+        // currentTimeが反映されるまで待つ
+        this.detectCaptureTimer = Number(setTimeout(() => {
+          if (this.$video && Decimal.sub(this.$video.currentTime, time).abs().toNumber() < 1) {
+            clearTimeout(this.detectCaptureTimer)
+            this.detectCaptureTimer = NaN
+            setTimeout(() => {
+              // currentTimeが反映されてもvideoは動いていないことがあるので、反映されてるまで待つ
+              resolve()
+            }, 500)
+          }
+          else {
+            if (retry >= 0) {
+              retry--
+            }
+            else {
+              // 諦める
+              clearTimeout(this.detectCaptureTimer)
+              this.detectCaptureTimer = NaN
+              reject(new Error('can\'t seek'))
+            }
+          }
+        }, 250))
+      }
+      else {
+        reject(new Error(''))
+      }
+    })
   }
 
   /**
