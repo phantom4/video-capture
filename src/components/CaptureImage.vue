@@ -1,5 +1,5 @@
 <template lang="pug">
-  .column.is-12-mobile.is-4-tablet.is-3-desktop
+  .column.is-12-mobile.is-4-tablet.is-3-desktop.is-2-widescreen
     .card
       //- モードによって表示する画像を変える
       //- TODO ダウンロードのファル名を設定する（アップロードしたファイル名_秒数？）
