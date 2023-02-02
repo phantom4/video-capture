@@ -22,7 +22,7 @@
     "date-fns": "^2.9.0",
     "decimal.js": "^10.2.0",
     "file-saver": "^2.0.2",
-    "jszip": "^3.2.2",
+    "jszip": "^3.8.0",
     "lodash": "^4.17.15",
     "scroll": "^3.0.1",
     "smooth-scroll": "^16.1.1",
